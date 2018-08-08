@@ -1,0 +1,151 @@
+//
+//  qbit-test-client.hp
+//  QBit WebSocket Client
+//
+//  Created by Bandoian, Terence (CONT) on 6/28/15.
+//
+//  Copyright (c) 2015 PushPoint Mobile.
+//
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
+//
+
+
+/* qbit method call message */
+
+#define QBIT_MAX_MESSAGE_SIZE   160
+
+static char * QBIT_MESSAGE_BODY =
+    "\x1d"                  /* address */
+        "/event/capture"
+
+    "\x1d"                  /* returnAddress */
+        "/event/capture/callback"
+
+    "\x1d"                  /* headers */
+
+    "\x1d"                  /* parameters */
+
+    "\x1d"                  /* object name */
+        "event"
+
+    "\x1d"                  /* method name */
+        "capture"
+
+    "\x1d"                  /* timestamp */
+        "%ld"
+
+    "\x1d"                  /* arguments */
+        "\"context\""
+    "\x1e"
+        "{\"key1\":\"value1\",\"key2\":\"value2\"}"
+    "\x1e"
+    ;
+
+//static char * QBIT_METHOD_CALL_MESSAGE =
+//    "\x1c"                  /* method call */
+//        "m"
+//
+//    "\x1d"                  /* message id */
+//        "%d"
+//
+//    "\x1d"                  /* address */
+//        "/event/capture"
+//
+//    "\x1d"                  /* returnAddress */
+//        "/event/capture/callback"
+//
+//    "\x1d"                  /* headers */
+//
+//    "\x1d"                  /* parameters */
+//
+//    "\x1d"                  /* object name */
+//        "event"
+//
+//    "\x1d"                  /* method name */
+//        "capture"
+//
+//    "\x1d"                  /* timestamp */
+//        "%ld"
+//
+//    "\x1d"                  /* arguments */
+//        "\"context\""
+//    "\x1e"
+//        "{\"key1\":\"value1\",\"key2\":\"value2\"}"
+//    "\x1e"
+//    ;
+
+
+/* qbit response validation */
+
+static char QBIT_SUCCESS_ARGUMENT[] = "status: 'success'";
+
+#define QBIT_SUCCESS_ARGUMENT_LEN ( sizeof( QBIT_SUCCESS_ARGUMENT ) - 1 )
+
+
+/* web socket connection */
+
+typedef struct {
+    int id;
+    int isClosed;
+}
+QBIT_CONNECTION;
+
+static QBIT_CONNECTION qbitConnection = { 0, FALSE };
+
+
+/* app synchronization */
+
+static char QBIT_APP_SEM_NAME[] = "/QbitAppSem";
+
+static sem_t * qbitAppSem = NULL;
+
+
+/* functions */
+
+static int initQbitApp();
+static void termQbitApp();
+
+static int sendQbitMessages( int connectionId );
+static int waitForQbitResponses();
+
+static void qbitServiceCallback( QBIT_SERVICE_EVENT eventId );
+
+static void qbitConnectionCallback(
+    int connectionId, QBIT_CONNECTION_EVENT event, void * data );
+
+static void qbitMessageCallback(
+    void * context, QBIT_MESSAGE_STATUS status, void * data, int len );
+
+
+/* performance tracking */
+
+#define MAX_XR_COUNT ( 512000 )
+
+static int transmitIndex;
+static struct timeval transmitTime[ MAX_XR_COUNT ];
+
+static int receiveIndex;
+static struct timeval receiveTime[ MAX_XR_COUNT ];
+
+static int getQbitTransmitCount();
+static int getQbitTransmitTime( struct timeval * time, int index );
+
+static int getQbitReceiveCount();
+static int getQbitReceiveTime( struct timeval * time, int index );
+
+static void printQbitPerformanceData();
+
+
+
+
+

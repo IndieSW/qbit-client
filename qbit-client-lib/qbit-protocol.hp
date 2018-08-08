@@ -1,0 +1,96 @@
+//
+//  qbit-protocol.hp
+//  QBit WebSocket Client
+//
+//  Created by Bandoian, Terence (CONT) on 6/28/15.
+//
+//  Copyright (c) 2015 PushPoint Mobile.
+//
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
+//
+
+
+/* libwebsockets buffer sizes */
+
+#define QBIT_LWS_PER_SESSION_DATA_SIZE  0
+
+#define QBIT_LWS_RX_BUFFER_SIZE \
+            ( MAX( QBIT_RECEIVE_FRAME_SIZE, QBIT_TRANSMIT_FRAME_SIZE ) )
+
+
+/* qbit protocol definition */
+
+static char QBIT_PROTOCOL_NAME[] = "qbit-json-ascii";
+
+static struct libwebsocket_protocols QBIT_PROTOCOL = {
+    QBIT_PROTOCOL_NAME,             /* name */
+    NULL,                           /* callback */
+    QBIT_LWS_PER_SESSION_DATA_SIZE, /* per_session_data_size */
+    QBIT_LWS_RX_BUFFER_SIZE,        /* rx_buffer_size */
+    0,                              /* id */
+    NULL,                           /* user */
+    NULL,                           /* owning_server */
+    0,                              /* protocol_index */
+};
+
+static struct libwebsocket_protocols * webSocketContextProtocol = NULL;
+
+
+/* context */
+
+typedef struct {
+    int connectionId;
+    QBIT_CONNECTION_CALLBACK * connectionCallback;
+    int isClosePending;
+
+    struct libwebsocket_context * webSocketContext;
+    struct libwebsocket * webSocket;
+
+    QBIT_TRANSMIT_CONTEXT transmitContext;
+    QBIT_RECEIVE_CONTEXT receiveContext;
+}
+QBIT_CONNECTION_CONTEXT;
+
+static QBIT_CONNECTION_CONTEXT qbitConnectionContext;
+static pthread_mutex_t qbitConnectionMutex = PTHREAD_MUTEX_INITIALIZER;
+
+
+/* functions */
+
+static void initQbitProtocolConnectionContext();
+
+static void freeQbitProtocolConnection(
+    QBIT_CONNECTION_CONTEXT * connectionContext );
+
+static int qbitCallback(
+    struct libwebsocket_context * webSocketContext,
+    struct libwebsocket * webSocket,
+    enum libwebsocket_callback_reasons reason,
+    void * user,
+    void * in,
+    size_t len );
+
+static int qbitClientEstablished(
+    QBIT_CONNECTION_CONTEXT * connectionContext,
+    struct libwebsocket_context * webSocketContext,
+    struct libwebsocket * webSocket );
+
+static int qbitClientConnectionError(
+    QBIT_CONNECTION_CONTEXT * connectionContext );
+
+static int qbitWsiDestroy( QBIT_CONNECTION_CONTEXT * connectionContext );
+
+static int qbitClientWritable( QBIT_TRANSMIT_CONTEXT * transmitContext );
+
+static int qbitClientReceive(
+    QBIT_RECEIVE_CONTEXT * receiveContext, void * in, size_t len );

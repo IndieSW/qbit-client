@@ -1,0 +1,54 @@
+//
+//  qbit-protocol-receive.hp
+//  QBit WebSocket Client
+//
+//  Created by Bandoian, Terence (CONT) on 6/28/15.
+//
+//  Copyright (c) 2015 PushPoint Mobile.
+//
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
+//
+
+
+/* receive thread */
+
+static char QBIT_RECEIVE_THREAD_SEM_NAME_PREFIX[] = "/QbitServiceReceiveSem";
+
+
+/* receive buffer */
+
+static void initQbitReceiveBuf( QBIT_QUEUE_ITEM ** receiveBuf );
+static void freeQbitReceiveBuf( QBIT_QUEUE_ITEM ** receiveBuf );
+
+
+/* receive queue */
+
+static int initQbitReceiveQueue( QBIT_QUEUE * queue );
+static void termQbitReceiveQueue( QBIT_QUEUE * queue );
+
+
+/* receive thread */
+
+static int initQbitReceiveThread( QBIT_RECEIVE_CONTEXT * context );
+static void termQbitReceiveThread( QBIT_RECEIVE_THREAD * thread );
+
+static int isReceiveThreadStopping( QBIT_RECEIVE_THREAD * thread );
+
+static void * processQbitReceiveQueue( void * qbitReceiveContext );
+static int processQbitMessage( char * buf, int len );
+static void processQbitResponseMessage( char * buf, int len );
+
+
+
+
+
